@@ -232,6 +232,17 @@
       box-shadow: var(--shadow);
     }
 
+    .privacy-note {
+      max-width: 560px;
+      margin: 16px auto 0;
+      padding: 0 12px;
+      text-align: center;
+      font-size: .8rem;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+    }
+
     .segmented-control {
       display: flex;
       position: relative;
@@ -1461,6 +1472,8 @@
         <div class="status" id="status"></div>
       </div>
 
+      <p class="privacy-note" id="privacyNote">Documents (PDF, Office, text, images) are converted entirely on your device — no uploads, no accounts, no tracking. Converting web/YouTube links or transcribing audio requires an internet connection.</p>
+
       <div class="panel result hidden" id="resultCard">
         <div class="result-head">
           <h2 id="resultTitle" style="display: none;">Result</h2>
@@ -1549,6 +1562,7 @@
     const statusEl = document.getElementById("status");
     const inputCard = document.getElementById("inputCard");
     const resultCard = document.getElementById("resultCard");
+    const privacyNote = document.getElementById("privacyNote");
     const resultTitle = document.getElementById("resultTitle");
     const previewEl = document.getElementById("preview");
     const rawEl = document.getElementById("raw");
@@ -1984,6 +1998,7 @@
 
         // Hide converter interface when conversion is successful
         if (inputCard) inputCard.classList.add("hidden");
+        if (privacyNote) privacyNote.classList.add("hidden");
 
         resultCard.classList.remove("hidden");
         resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -2001,6 +2016,7 @@
 
       // Show converter interface again
       if (inputCard) inputCard.classList.remove("hidden");
+      if (privacyNote) privacyNote.classList.remove("hidden");
       inputCard.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
