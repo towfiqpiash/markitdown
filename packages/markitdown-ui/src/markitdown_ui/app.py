@@ -49,6 +49,51 @@ def _build_markitdown() -> MarkItDown:
     return MarkItDown(**kwargs)
 
 
+import re
+
+def _clean_markdown_whitespace(text: str) -> str:
+    """Clean up PDF and document layout justification artifacts (e.g. 2+ spaces, tabs, \xa0)
+    between words in a sentence, while preserving code blocks, tables, and list indentations.
+    """
+    if not text:
+        return text
+
+    # Normalize non-breaking spaces & zero-width characters to standard space
+    text = text.replace("\xa0", " ").replace("\u00a0", " ").replace("\u200b", "")
+
+    lines = text.splitlines()
+    cleaned_lines = []
+    in_code_block = False
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            cleaned_lines.append(line)
+            continue
+
+        if in_code_block:
+            cleaned_lines.append(line)
+            continue
+
+        if stripped.startswith("|") and stripped.endswith("|"):
+            cleaned_lines.append(line)
+            continue
+
+        # Match leading indentation vs line content
+        match = re.match(r"^(\s*)(.*)$", line)
+        if match:
+            indent, content = match.group(1), match.group(2)
+            # Collapse 2 or more horizontal whitespace characters inside content to a single space
+            cleaned_content = re.sub(r"[^\S\r\n]{2,}", " ", content)
+            cleaned_lines.append(indent + cleaned_content)
+        else:
+            cleaned_lines.append(line)
+
+    return "\n".join(cleaned_lines)
+
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="MarkItDown UI", version="0.0.1")
 
@@ -90,10 +135,11 @@ def create_app() -> FastAPI:
         except FileConversionException as exc:
             raise HTTPException(status_code=422, detail=f"Conversion failed: {exc}")
 
+        clean_md = _clean_markdown_whitespace(result.markdown)
         return JSONResponse(
             {
                 "title": result.title,
-                "markdown": result.markdown,
+                "markdown": clean_md,
                 "filename": file.filename,
             }
         )
@@ -123,10 +169,11 @@ def create_app() -> FastAPI:
         except Exception as exc:  # network errors, bad hosts, etc.
             raise HTTPException(status_code=400, detail=f"Could not fetch URL: {exc}")
 
+        clean_md = _clean_markdown_whitespace(result.markdown)
         return JSONResponse(
             {
                 "title": result.title,
-                "markdown": result.markdown,
+                "markdown": clean_md,
                 "filename": url,
             }
         )
