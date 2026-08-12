@@ -1662,7 +1662,35 @@
     });
     convertBtn.addEventListener("click", convert);
 
+    function applyPastedUrl(text) {
+      const trimmed = (text || "").trim();
+      if (!trimmed) {
+        showUrlError("Couldn't auto-paste — please press ⌘V in the field.");
+        return;
+      }
+      if (!isValidUrl(trimmed)) {
+        showUrlError();
+        return;
+      }
+      urlInput.value = trimmed;
+      if (selectedFile) clearFile();
+      setInputMode("url");
+      urlInput.focus();
+    }
+
     async function pasteFromClipboard() {
+      // Native macOS app: read NSPasteboard directly via the Swift bridge so the
+      // paste happens immediately, instead of triggering WKWebView's clipboard
+      // permission popover (which shows its own "Paste" button to click).
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.readClipboardText) {
+        window.__nativeClipboardResult = (text) => {
+          window.__nativeClipboardResult = null;
+          applyPastedUrl(text);
+        };
+        window.webkit.messageHandlers.readClipboardText.postMessage(null);
+        return;
+      }
+
       try {
         if (navigator.clipboard && navigator.clipboard.readText) {
           const text = (await navigator.clipboard.readText()).trim();

@@ -204,6 +204,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         contentController.add(self, name: "copyText")
         contentController.add(self, name: "saveFile")
         contentController.add(self, name: "openSystemSettings")
+        contentController.add(self, name: "readClipboardText")
 
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.userContentController = contentController
@@ -239,6 +240,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         } else if message.name == "openSystemSettings" {
             if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
                 NSWorkspace.shared.open(url)
+            }
+        } else if message.name == "readClipboardText" {
+            let text = NSPasteboard.general.string(forType: .string) ?? ""
+            // Encode as a single-element JSON array so it can be safely spread as a JS string argument.
+            if let data = try? JSONSerialization.data(withJSONObject: [text]),
+               let json = String(data: data, encoding: .utf8) {
+                let js = "window.__nativeClipboardResult && window.__nativeClipboardResult(...\(json))"
+                webView.evaluateJavaScript(js, completionHandler: nil)
             }
         }
     }
