@@ -13,19 +13,19 @@
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 85%, #60a5fa 100%);
-      --card: rgba(255, 255, 255, 0.94);
+      --card: rgba(255, 255, 255, 0.88);
       --ink: #0f172a;
       --ink-soft: #1e293b;
       --muted: #64748b;
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --border: #cbd5e1;
-      --border-dashed: #93c5fd;
+      --primary: #007aff;
+      --primary-dark: #0062cc;
+      --border: rgba(0, 0, 0, 0.12);
+      --border-dashed: #a5c7fc;
       --on-dark: #ffffff;
       --field: #f8fafc;
-      --shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 30px rgba(37, 99, 235, 0.25);
-      --display: "Fraunces", Georgia, "Times New Roman", serif;
-      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.15);
+      --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
     }
 
     h1,
@@ -44,7 +44,11 @@
     html,
     body {
       margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100vh;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     body {
@@ -54,18 +58,40 @@
       font-family: var(--sans);
       line-height: 1.55;
       -webkit-font-smoothing: antialiased;
-    }
-
-    /* ---------- Header ---------- */
-    header {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 36px 20px 10px;
+    }
+
+    button, input, select, a, .dropzone, .tab, .segmented-control, .picked {
+      -webkit-app-region: no-drag;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 780px;
+      margin: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    /* ---------- Header & Native Drag Region ---------- */
+    header {
+      -webkit-app-region: drag;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0 0 16px 0;
+      padding: 8px 0;
       text-align: center;
+      user-select: none;
     }
 
     .logo {
@@ -82,10 +108,10 @@
 
     .logo small {
       display: block;
-      font-size: .6rem;
+      font-size: .62rem;
       font-style: normal;
       font-weight: 700;
-      letter-spacing: .35em;
+      letter-spacing: .22em;
       text-align: center;
       color: #bfdbfe;
       margin-top: 4px;
@@ -148,9 +174,10 @@
 
     /* ---------- Converter ---------- */
     main {
+      width: 100%;
       max-width: 780px;
-      margin: 0 auto;
-      padding: 20px 20px 80px;
+      margin: 0;
+      padding: 0;
     }
 
     .section-title {
@@ -601,6 +628,213 @@
       color: #2563eb;
     }
 
+    /* ---------- Settings Cog & Modal ---------- */
+    .settings-btn {
+      position: fixed;
+      top: 18px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      box-shadow: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0.85;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease, filter 0.15s ease;
+      -webkit-app-region: no-drag;
+    }
+
+    .settings-btn:hover {
+      opacity: 1;
+      transform: scale(1.15) rotate(60deg);
+      color: #ffffff;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(40px);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+      transform: scale(0.95);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.15s ease;
+    }
+
+    .modal-close:hover {
+      background: #cbd5e1;
+      color: #0f172a;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .diag-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .diag-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .diag-title {
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--ink);
+    }
+
+    .diag-badge {
+      font-size: .72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    .diag-badge.ready {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .diag-badge.optional {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .diag-badge.info {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .diag-desc {
+      font-size: .86rem;
+      color: var(--muted);
+      margin: 0 0 10px 0;
+      line-height: 1.45;
+    }
+
+    .diag-cmd-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0f172a;
+      color: #38bdf8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .8rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      gap: 10px;
+    }
+
+    .diag-cmd-text {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .diag-copy-btn, .diag-action-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #ffffff;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+
+    .diag-copy-btn:hover, .diag-action-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
     pre {
       background: #14181d;
       color: #e3e6ea;
@@ -610,6 +844,8 @@
       max-height: 62vh;
       margin: 0;
       font-size: .85rem;
+      tab-size: 2;
+      -moz-tab-size: 2;
       white-space: pre-wrap;
       word-break: break-word;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -1140,120 +1376,149 @@
     <svg class="doodle float-4" style="top: 93%; left: 96%; width: 42px; height: 42px;" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle></svg>
   </div>
 
-  <header>
-    <a class="logo" href="/">convert2md<small>Offline</small></a>
-  </header>
+  <div class="app-shell">
+    <header>
+      <a class="logo" href="/">convert2md<small>by Pxelo</small></a>
+    </header>
 
-  <main>
+    <main>
 
-    <div class="panel" id="inputCard">
-      <div class="segmented-control" id="segmentControl" data-active="file">
-        <div class="segment-slider"></div>
-        <button class="segment-btn active" id="btnFile">Upload File</button>
-        <button class="segment-btn" id="btnUrl">Website URL</button>
-      </div>
-
-      <div class="dropzone collapsible" id="dropzone">
-        <div class="fileicon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-            <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
-          </svg>
+      <div class="panel" id="inputCard">
+        <div class="segmented-control" id="segmentControl" data-active="file">
+          <div class="segment-slider"></div>
+          <button class="segment-btn active" id="btnFile">Upload File</button>
+          <button class="segment-btn" id="btnUrl">Website URL</button>
         </div>
-        <h3>Upload your file</h3>
-        <p>Drag and drop or click to select</p>
-        <button class="select-btn" type="button" id="selectBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 15V3" />
-            <path d="m7 8 5-5 5 5" />
-            <path d="M5 21h14" />
-          </svg>
-          Select File
-        </button>
-        <div class="picked" id="picked">
-          <span id="pickedName"></span>
-          <span class="clear" id="clearPick" title="Remove">✕</span>
-        </div>
-      </div>
-      <input type="file" id="fileInput" />
 
-      <div class="url-row collapsible collapsed" id="urlRow">
-        <span class="linkicon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-          </svg>
-        </span>
-        <input type="url" id="urlInput" placeholder="e.g. https://en.wikipedia.org/wiki/Markdown or a YouTube link" />
-        <button class="clear-url-btn" id="clearUrlBtn" type="button" title="Clear URL" style="display: none;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-        <button class="paste-btn" id="pasteBtn" type="button" title="Paste from clipboard">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-          </svg>
-        </button>
-      </div>
-
-      <button class="convert-btn" id="convertBtn" disabled>Convert</button>
-
-      <div class="status" id="status"></div>
-    </div>
-
-    <div class="panel result hidden" id="resultCard">
-      <div class="result-head">
-        <h2 id="resultTitle" style="display: none;">Result</h2>
-        <div class="tabs">
-          <button class="tab active" data-tab="preview">Preview</button>
-          <button class="tab" data-tab="raw">Markdown</button>
-        </div>
-        <div class="actions">
-          <div class="action-btn-group">
-            <button class="ghost-btn icon-only" id="copyBtn" title="Copy to clipboard" aria-label="Copy to clipboard">
-              <svg class="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              <svg class="check-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </button>
-            <button class="ghost-btn icon-only" id="downloadBtn" title="Download .md file" aria-label="Download .md">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </button>
+        <div class="dropzone collapsible" id="dropzone">
+          <div class="fileicon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+              <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
+            </svg>
           </div>
-          <div class="action-btn-group">
-            <button class="ghost-btn" id="convertAgainBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              Start New
-            </button>
+          <h3>Upload your file</h3>
+          <p>Drag and drop or click to select</p>
+          <button class="select-btn" type="button" id="selectBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 15V3" />
+              <path d="m7 8 5-5 5 5" />
+              <path d="M5 21h14" />
+            </svg>
+            Select File
+          </button>
+          <div class="picked" id="picked">
+            <span id="pickedName"></span>
+            <span class="clear" id="clearPick" title="Remove">✕</span>
           </div>
         </div>
+        <input type="file" id="fileInput" />
+
+        <div class="url-row collapsible collapsed" id="urlRow">
+          <span class="linkicon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+          </span>
+          <input type="url" id="urlInput" placeholder="e.g. https://en.wikipedia.org/wiki/Markdown or a YouTube link" />
+          <button class="clear-url-btn" id="clearUrlBtn" type="button" title="Clear URL" style="display: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <button class="paste-btn" id="pasteBtn" type="button" title="Paste from clipboard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+          </button>
+        </div>
+
+        <button class="convert-btn" id="convertBtn" disabled>Convert</button>
+
+        <div class="status" id="status"></div>
       </div>
-      <div id="preview"></div>
-      <pre id="raw" class="hidden"></pre>
+
+      <div class="panel result hidden" id="resultCard">
+        <div class="result-head">
+          <h2 id="resultTitle" style="display: none;">Result</h2>
+          <div class="tabs">
+            <button class="tab active" data-tab="preview">Preview</button>
+            <button class="tab" data-tab="raw">Markdown</button>
+          </div>
+          <div class="actions">
+            <div class="action-btn-group">
+              <button class="ghost-btn icon-only" id="copyBtn" title="Copy to clipboard" aria-label="Copy to clipboard">
+                <svg class="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <svg class="check-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              <button class="ghost-btn icon-only" id="downloadBtn" title="Download .md file" aria-label="Download .md">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="action-btn-group">
+              <button class="ghost-btn" id="convertAgainBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Start New
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="preview"></div>
+        <pre id="raw" class="hidden"></pre>
+      </div>
+    </main>
+  </div>
+
+  <!-- Fixed Bottom-Left Settings Cog Button -->
+  <button class="settings-btn" id="settingsBtn" title="Settings & System Diagnostics" aria-label="Settings">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  </button>
+
+  <!-- Settings & Diagnostics Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Settings & System Diagnostics
+        </h2>
+        <button class="modal-close" id="closeSettingsBtn" title="Close">✕</button>
+      </div>
+      <div class="modal-body" id="settingsModalBody">
+        <div style="text-align: center; padding: 20px; color: var(--muted);">Loading diagnostics...</div>
+      </div>
     </div>
-  </main>
+  </div>
 
   <script>
     const dropzone = document.getElementById("dropzone");
@@ -1456,7 +1721,46 @@
       });
     });
     copyBtn.addEventListener("click", async () => {
-      await navigator.clipboard.writeText(currentMarkdown);
+      let copied = false;
+
+      // Native macOS WebKit Swift bridge
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.copyText) {
+        try {
+          window.webkit.messageHandlers.copyText.postMessage(currentMarkdown);
+          copied = true;
+        } catch (e) {
+          console.warn("Native copyText messageHandler failed:", e);
+        }
+      }
+
+      if (!copied) {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(currentMarkdown);
+            copied = true;
+          }
+        } catch (e) {
+          console.warn("navigator.clipboard.writeText failed:", e);
+        }
+      }
+
+      if (!copied) {
+        try {
+          const textarea = document.createElement("textarea");
+          textarea.value = currentMarkdown;
+          textarea.style.position = "fixed";
+          textarea.style.top = "-9999px";
+          textarea.style.left = "-9999px";
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          copied = document.execCommand("copy");
+          document.body.removeChild(textarea);
+        } catch (e) {
+          console.warn("execCommand copy failed:", e);
+        }
+      }
+
       const copyIcon = copyBtn.querySelector(".copy-icon");
       const checkIcon = copyBtn.querySelector(".check-icon");
       if (copyIcon && checkIcon) {
@@ -1468,13 +1772,45 @@
         }, 1500);
       }
     });
+
     downloadBtn.addEventListener("click", () => {
-      const blob = new Blob([currentMarkdown], { type: "text/markdown" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = (currentName.replace(/\.[^.]+$/, "").replace(/[^\w.-]+/g, "_") || "output") + ".md";
-      a.click();
-      URL.revokeObjectURL(a.href);
+      const filename = (currentName.replace(/\.[^.]+$/, "").replace(/[^\w.-]+/g, "_") || "output") + ".md";
+      const content = currentMarkdown || "";
+
+      // Native macOS WebKit Swift bridge -> triggers native NSSavePanel dialog!
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.saveFile) {
+        try {
+          window.webkit.messageHandlers.saveFile.postMessage({ filename: filename, content: content });
+          return;
+        } catch (e) {
+          console.warn("Native saveFile messageHandler failed:", e);
+        }
+      }
+
+      // Universal Web Fallback
+      try {
+        const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        }, 300);
+      } catch (e) {
+        console.warn("Blob download failed, using Data URI fallback:", e);
+        const a = document.createElement("a");
+        a.href = "data:text/markdown;charset=utf-8," + encodeURIComponent(content);
+        a.download = filename;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => document.body.removeChild(a), 300);
+      }
     });
 
     // --- Status & Smooth Percentage Progress helpers ---
@@ -1495,9 +1831,9 @@
       clearInterval(progressTimer);
       progressTimer = setInterval(() => {
         const elapsedSec = (performance.now() - startTime) / 1000;
-        // Smooth logarithmic time curve: gradual steady progress towards 94% max while awaiting response
-        const calculatedPct = 94 * (1 - Math.exp(-elapsedSec / 1.8));
-        if (currentPercent < 94) {
+        // Smooth continuous time curve: steady progress up to 98% max while awaiting response
+        const calculatedPct = 98 * (1 - Math.exp(-elapsedSec / 6.0));
+        if (currentPercent < 98) {
           updateProgressUI(calculatedPct);
         }
       }, 50);
@@ -1712,6 +2048,144 @@
       }
 
       return out.join("\n");
+    }
+
+    // --- Settings & Diagnostics Modal ---
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsModal = document.getElementById("settingsModal");
+    const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+    const settingsModalBody = document.getElementById("settingsModalBody");
+
+    settingsBtn.addEventListener("click", () => {
+      settingsModal.classList.add("open");
+      loadDiagnostics();
+    });
+
+    closeSettingsBtn.addEventListener("click", () => {
+      settingsModal.classList.remove("open");
+    });
+
+    settingsModal.addEventListener("click", (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.remove("open");
+      }
+    });
+
+    async function loadDiagnostics() {
+      try {
+        const res = await fetch("/api/settings/diagnostics");
+        const data = await res.json();
+        renderDiagnostics(data.diagnostics || []);
+      } catch (err) {
+        settingsModalBody.innerHTML = `<div class="status error">Failed to load diagnostics: ${err.message}</div>`;
+      }
+    }
+
+    function renderDiagnostics(items) {
+      if (!items.length) {
+        settingsModalBody.innerHTML = `<div style="text-align: center; color: var(--muted);">No diagnostic info available.</div>`;
+        return;
+      }
+
+      settingsModalBody.innerHTML = items.map(item => {
+        let badgeClass = item.status || "ready";
+        let fixContent = "";
+
+        if (item.id === "full_disk_access") {
+          fixContent = `
+            <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 8px 12px; border-radius: 8px;">
+              <span style="font-size: .8rem; color: #334155;">Grant Full Disk Access in macOS Settings</span>
+              <button class="diag-action-btn" style="background: #007aff; color: #fff;" onclick="openMacOSSettings()">Open System Settings</button>
+            </div>
+          `;
+        } else if (item.fixCommand) {
+          fixContent = `
+            <div class="diag-cmd-box" style="margin-top: 8px;">
+              <span class="diag-cmd-text">${escapeHtml(item.fixCommand)}</span>
+              <button class="diag-copy-btn" data-cmd="${escapeHtml(item.fixCommand)}">Copy Command</button>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="diag-card">
+            <div class="diag-head">
+              <span class="diag-title">${escapeHtml(item.name)}</span>
+              <span class="diag-badge ${badgeClass}">${escapeHtml(item.badge)}</span>
+            </div>
+            <p class="diag-desc">${escapeHtml(item.description)}</p>
+            ${fixContent}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".diag-copy-btn");
+      if (btn) {
+        const cmd = btn.getAttribute("data-cmd");
+        if (!cmd) return;
+
+        let copied = false;
+        // Native macOS WebKit Swift bridge check
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.copyText) {
+          try {
+            window.webkit.messageHandlers.copyText.postMessage(cmd);
+            copied = true;
+          } catch (err) {
+            console.warn("Native copyText messageHandler failed:", err);
+          }
+        }
+
+        if (!copied) {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(cmd);
+              copied = true;
+            }
+          } catch (err) {
+            console.warn("navigator.clipboard.writeText failed:", err);
+          }
+        }
+
+        if (!copied) {
+          try {
+            const textarea = document.createElement("textarea");
+            textarea.value = cmd;
+            textarea.style.position = "fixed";
+            textarea.style.top = "-9999px";
+            textarea.style.left = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            copied = document.execCommand("copy");
+            document.body.removeChild(textarea);
+          } catch (err) {
+            console.warn("execCommand copy failed:", err);
+          }
+        }
+
+        const origText = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.style.background = "#16a34a";
+        setTimeout(() => {
+          btn.textContent = origText;
+          btn.style.background = "";
+        }, 1500);
+      }
+    });
+
+    function openMacOSSettings() {
+      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openSystemSettings) {
+        window.webkit.messageHandlers.openSystemSettings.postMessage({});
+      } else {
+        alert("To grant permission:\nOpen System Settings → Privacy & Security → Full Disk Access → Enable MarkItDown.app");
+      }
     }
 
     refreshConvertState();

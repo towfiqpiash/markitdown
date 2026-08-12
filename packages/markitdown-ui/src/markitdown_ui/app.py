@@ -93,7 +93,6 @@ def _clean_markdown_whitespace(text: str) -> str:
     return "\n".join(cleaned_lines)
 
 
-
 def create_app() -> FastAPI:
     app = FastAPI(title="MarkItDown UI", version="0.0.1")
 
@@ -177,6 +176,59 @@ def create_app() -> FastAPI:
                 "filename": url,
             }
         )
+
+    @app.get("/api/settings/diagnostics")
+    async def get_diagnostics() -> JSONResponse:
+        import shutil
+
+        has_ffmpeg = shutil.which("ffmpeg") is not None
+        has_tesseract = shutil.which("tesseract") is not None
+        doc_intel_endpoint = os.getenv("DOCUMENT_INTELLIGENCE_ENDPOINT")
+
+        items = [
+            {
+                "id": "core",
+                "name": "Core Converters (PDF, DOCX, XLSX, PPTX, HTML, TXT, EPUB, CSV)",
+                "status": "ready",
+                "badge": "✓ Ready",
+                "description": "Native offline document conversion engine.",
+                "fixCommand": None
+            },
+            {
+                "id": "ffmpeg",
+                "name": "Audio Conversion Engine (FFmpeg)",
+                "status": "ready" if has_ffmpeg else "optional",
+                "badge": "✓ Installed" if has_ffmpeg else "Optional Setup",
+                "description": "Required for audio files (MP3, WAV, M4A). Run command in any macOS Terminal window.",
+                "fixCommand": "brew install ffmpeg"
+            },
+            {
+                "id": "tesseract",
+                "name": "Image OCR Engine (Tesseract)",
+                "status": "ready" if has_tesseract else "optional",
+                "badge": "✓ Installed" if has_tesseract else "Optional Setup",
+                "description": "Required for image text extraction & OCR. Run command in any macOS Terminal window.",
+                "fixCommand": "brew install tesseract"
+            },
+            {
+                "id": "doc_intel",
+                "name": "Azure Document Intelligence (Cloud OCR)",
+                "status": "ready" if doc_intel_endpoint else "optional",
+                "badge": "✓ Connected" if doc_intel_endpoint else "Optional Endpoint",
+                "description": "Cloud AI for complex form layout and high-precision table extraction.",
+                "fixCommand": 'export DOCUMENT_INTELLIGENCE_ENDPOINT="https://your-resource.cognitiveservices.azure.com/"'
+            },
+            {
+                "id": "full_disk_access",
+                "name": "macOS Full Disk Access Permission",
+                "status": "info",
+                "badge": "macOS Privacy",
+                "description": "Allows MarkItDown to convert files inside protected macOS folders (Desktop, Documents, Downloads).",
+                "fixCommand": "Open System Settings → Privacy & Security → Full Disk Access → Enable MarkItDown"
+            }
+        ]
+
+        return JSONResponse({"diagnostics": items})
 
     return app
 

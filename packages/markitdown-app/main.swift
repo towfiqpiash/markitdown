@@ -4,7 +4,7 @@ import Foundation
 import Network
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDelegate, NSWindowDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDelegate, NSWindowDelegate, WKScriptMessageHandler {
     static func main() {
         let app = NSApplication.shared
         let delegate = AppDelegate()
@@ -173,7 +173,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
     }
 
     func setupWindow() {
-        let windowSize = NSSize(width: 1120, height: 780)
+        let windowSize = NSSize(width: 820, height: 680)
         let screenSize = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1400, height: 900)
         let rect = NSRect(
             x: (screenSize.width - windowSize.width) / 2,
@@ -182,24 +182,65 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             height: windowSize.height
         )
 
-        let mask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable]
+        let mask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
         window = NSWindow(contentRect: rect, styleMask: mask, backing: .buffered, defer: false)
         window.title = "MarkItDown"
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.isMovableByWindowBackground = true
         window.minSize = NSSize(width: 360, height: 480)
         window.delegate = self
         window.center()
 
+        // Add native macOS translucency effect
+        let visualEffect = NSVisualEffectView(frame: window.contentView!.bounds)
+        visualEffect.autoresizingMask = [.width, .height]
+        visualEffect.material = .underWindowBackground
+        visualEffect.blendingMode = .behindWindow
+        visualEffect.state = .active
+        window.contentView?.addSubview(visualEffect)
+
+        let contentController = WKUserContentController()
+        contentController.add(self, name: "copyText")
+        contentController.add(self, name: "saveFile")
+        contentController.add(self, name: "openSystemSettings")
+
         let webConfiguration = WKWebViewConfiguration()
+        webConfiguration.userContentController = contentController
         webConfiguration.preferences.setValue(true, forKey: "developerExtrasEnabled")
 
-        webView = WKWebView(frame: window.contentView!.bounds, configuration: webConfiguration)
+        webView = DraggableWebView(frame: window.contentView!.bounds, configuration: webConfiguration)
         webView.autoresizingMask = [.width, .height]
         webView.navigationDelegate = self
         webView.uiDelegate = self
+        webView.setValue(false, forKey: "drawsBackground")
 
         window.contentView?.addSubview(webView)
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "copyText", let text = message.body as? String {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(text, forType: .string)
+        } else if message.name == "saveFile", let dict = message.body as? [String: String] {
+            let filename = dict["filename"] ?? "output.md"
+            let content = dict["content"] ?? ""
+
+            let savePanel = NSSavePanel()
+            savePanel.nameFieldStringValue = filename
+            savePanel.begin { result in
+                if result == .OK, let url = savePanel.url {
+                    try? content.write(to: url, atomically: true, encoding: .utf8)
+                }
+            }
+        } else if message.name == "openSystemSettings" {
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
+                NSWorkspace.shared.open(url)
+            }
+        }
     }
 
     func loadServerURL() {
@@ -261,5 +302,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
                 completionHandler(nil)
             }
         }
+    }
+}
+
+class DraggableWebView: WKWebView {
+    override var mouseDownCanMoveWindow: Bool {
+        return true
     }
 }
