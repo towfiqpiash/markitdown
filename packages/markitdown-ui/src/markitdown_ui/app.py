@@ -96,8 +96,8 @@ def _clean_markdown_whitespace(text: str) -> str:
 def create_app() -> FastAPI:
     app = FastAPI(title="MarkItDown UI", version="0.0.1")
 
-    # Serve bundled assets (self-hosted Fraunces font, etc.) so the UI works
-    # fully offline with no external network requests.
+    # Serve bundled assets (self-hosted Plus Jakarta Sans font, etc.) so the UI
+    # works fully offline with no external network requests.
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     @app.get("/", response_class=HTMLResponse)
