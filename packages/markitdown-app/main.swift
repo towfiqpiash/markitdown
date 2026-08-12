@@ -205,6 +205,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
         contentController.add(self, name: "saveFile")
         contentController.add(self, name: "openSystemSettings")
         contentController.add(self, name: "readClipboardText")
+        contentController.add(self, name: "toggleZoom")
 
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.userContentController = contentController
@@ -241,6 +242,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKUIDe
             if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
                 NSWorkspace.shared.open(url)
             }
+        } else if message.name == "toggleZoom" {
+            window.zoom(nil)
         } else if message.name == "readClipboardText" {
             let text = NSPasteboard.general.string(forType: .string) ?? ""
             // Encode as a single-element JSON array so it can be safely spread as a JS string argument.
