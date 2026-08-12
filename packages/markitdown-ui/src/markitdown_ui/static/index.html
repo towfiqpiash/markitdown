@@ -157,7 +157,7 @@
       backdrop-filter: blur(10px);
       color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 8px;
+      border-radius: 5.33px;
       padding: 10px 18px;
       cursor: pointer;
       text-decoration: none;
@@ -223,11 +223,11 @@
     }
 
     .panel {
-      background: var(--card);
+      background: #ffffff;
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
       border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 24px;
+      border-radius: 16px;
       padding: 30px;
       box-shadow: var(--shadow);
     }
@@ -237,7 +237,7 @@
       position: relative;
       background: #f1f5f9;
       border: 1px solid #e2e8f0;
-      border-radius: 14px;
+      border-radius: 9.33px;
       padding: 5px;
       margin-bottom: 24px;
     }
@@ -246,6 +246,10 @@
       flex: 1;
       position: relative;
       z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
       border: none;
       background: transparent;
       padding: 11px 0;
@@ -254,8 +258,12 @@
       font-size: 0.98rem;
       color: #64748b;
       cursor: pointer;
-      border-radius: 10px;
+      border-radius: 6.67px;
       transition: color 0.3s;
+    }
+
+    .segment-btn svg {
+      flex: none;
     }
 
     .segment-btn.active {
@@ -269,7 +277,7 @@
       left: 5px;
       width: calc(50% - 5px);
       background: #ffffff;
-      border-radius: 10px;
+      border-radius: 6.67px;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12), 0 1px 2px rgba(0, 0, 0, 0.05);
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 0;
@@ -281,7 +289,7 @@
 
     .dropzone {
       border: 2px dashed var(--border-dashed);
-      border-radius: 18px;
+      border-radius: 12px;
       padding: 44px 20px;
       text-align: center;
       cursor: pointer;
@@ -311,7 +319,7 @@
 
     .dropzone p {
       color: var(--muted);
-      margin: 0 0 18px;
+      margin: 0;
       font-size: .95rem;
     }
 
@@ -319,27 +327,14 @@
       display: none;
     }
 
-    .select-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--sans);
+    .select-link {
+      color: var(--primary);
       font-weight: 600;
-      font-size: .95rem;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #ffffff;
-      border: none;
-      border-radius: 12px;
-      padding: 11px 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-      transition: all 0.15s ease;
+      text-decoration: none;
     }
 
-    .select-btn:hover {
-      background: linear-gradient(135deg, #1d4ed8, #1e40af);
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
-      transform: translateY(-1px);
+    .select-link:hover {
+      color: var(--primary-dark);
     }
 
     .picked {
@@ -368,13 +363,8 @@
       gap: 10px;
       background: var(--field);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 9.33px;
       padding: 5px 5px 5px 16px;
-    }
-
-    .url-row .linkicon {
-      color: var(--primary);
-      flex: none;
     }
 
     .url-row input {
@@ -398,8 +388,8 @@
       justify-content: center;
       background: #ffffff;
       color: var(--ink);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      border: none;
+      border-radius: 6.67px;
       padding: 8px;
       cursor: pointer;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -414,13 +404,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #ffffff;
+      background: transparent;
       color: var(--muted);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      border: none;
+      border-radius: 6.67px;
       padding: 8px;
       cursor: pointer;
-      margin-right: 4px;
+      margin-right: 2px;
     }
 
     .clear-url-btn:hover {
@@ -438,7 +428,7 @@
       color: #ffffff;
       background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       border: none;
-      border-radius: 16px;
+      border-radius: 10.67px;
       cursor: pointer;
       box-shadow: 0 8px 25px -5px rgba(37, 99, 235, 0.5);
       transition: transform .15s, box-shadow .15s, filter .15s;
@@ -548,7 +538,7 @@
       align-items: center;
       gap: 2px;
       background: #ffffff;
-      border-radius: 10px;
+      border-radius: 6.67px;
       padding: 2px;
       border: 1px solid var(--border);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -559,7 +549,7 @@
       font-weight: 600;
       font-size: .85rem;
       padding: 8px 16px;
-      border-radius: 8px;
+      border-radius: 5.33px;
       cursor: pointer;
       border: none;
       background: transparent;
@@ -585,7 +575,7 @@
       background: #ffffff;
       color: var(--ink);
       border: 1px solid var(--border);
-      border-radius: 9px;
+      border-radius: 6px;
       padding: 8px 14px;
       cursor: pointer;
       display: inline-flex;
@@ -611,7 +601,7 @@
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: #ffffff;
       border: none;
-      border-radius: 9px;
+      border-radius: 6px;
       padding: 8px 16px;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
@@ -629,7 +619,7 @@
       align-items: center;
       background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 6.67px;
       padding: 2px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       gap: 2px;
@@ -638,7 +628,7 @@
     .action-btn-group .ghost-btn {
       border: none;
       box-shadow: none;
-      border-radius: 8px;
+      border-radius: 5.33px;
     }
 
     .action-btn-group .ghost-btn+.ghost-btn {
@@ -667,7 +657,7 @@
       right: 20px;
       width: 36px;
       height: 36px;
-      border-radius: 8px;
+      border-radius: 5.33px;
       background: transparent;
       border: none;
       color: #ffffff;
@@ -716,7 +706,7 @@
     .modal-card {
       background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(40px);
-      border-radius: 20px;
+      border-radius: 13.33px;
       width: 100%;
       max-width: 640px;
       max-height: 85vh;
@@ -783,7 +773,7 @@
     .diag-card {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 14px;
+      border-radius: 9.33px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     }
@@ -805,7 +795,7 @@
       font-size: .72rem;
       font-weight: 700;
       padding: 3px 10px;
-      border-radius: 12px;
+      border-radius: 8px;
       text-transform: uppercase;
       letter-spacing: .02em;
     }
@@ -841,7 +831,7 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: .8rem;
       padding: 8px 12px;
-      border-radius: 8px;
+      border-radius: 5.33px;
       gap: 10px;
     }
 
@@ -857,7 +847,7 @@
       font-size: .75rem;
       font-weight: 600;
       padding: 4px 10px;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
       white-space: nowrap;
       transition: background 0.15s ease;
@@ -870,7 +860,7 @@
     pre {
       background: #14181d;
       color: #e3e6ea;
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 18px;
       overflow: auto;
       max-height: 62vh;
@@ -960,7 +950,7 @@
 
     #preview img {
       max-width: 100%;
-      border-radius: 8px;
+      border-radius: 5.33px;
     }
 
     #preview hr {
@@ -975,7 +965,7 @@
       color: var(--muted);
       border-left: 3px solid var(--border);
       background: rgba(18, 30, 37, .03);
-      border-radius: 0 8px 8px 0;
+      border-radius: 0 5.33px 5.33px 0;
     }
 
     #preview code {
@@ -983,13 +973,13 @@
       font-size: .88em;
       background: rgba(18, 30, 37, .07);
       padding: .12em .4em;
-      border-radius: 5px;
+      border-radius: 3.33px;
     }
 
     #preview pre {
       background: #14181d;
       color: #e3e6ea;
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 16px;
       overflow-x: auto;
       margin: .9em 0;
@@ -1115,7 +1105,7 @@
       padding: 8px 16px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 13.33px;
       font-family: var(--sans);
       font-weight: 600;
       font-size: .95rem;
@@ -1233,12 +1223,12 @@
 
       .panel {
         padding: 16px;
-        border-radius: 18px;
+        border-radius: 12px;
       }
 
       .dropzone {
         padding: 24px 12px;
-        border-radius: 14px;
+        border-radius: 9.33px;
       }
 
       .dropzone h3 {
@@ -1247,12 +1237,6 @@
 
       .dropzone p {
         font-size: .85rem;
-        margin-bottom: 12px;
-      }
-
-      .select-btn {
-        padding: 9px 16px;
-        font-size: .88rem;
       }
 
       .segmented-control {
@@ -1273,7 +1257,7 @@
         padding: 13px;
         font-size: 1rem;
         margin-top: 16px;
-        border-radius: 14px;
+        border-radius: 9.33px;
       }
 
       .result-head {
@@ -1418,8 +1402,23 @@
       <div class="panel" id="inputCard">
         <div class="segmented-control" id="segmentControl" data-active="file">
           <div class="segment-slider"></div>
-          <button class="segment-btn active" id="btnFile">Upload File</button>
-          <button class="segment-btn" id="btnUrl">Website URL</button>
+          <button class="segment-btn active" id="btnFile">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 15V3" />
+              <path d="m7 8 5-5 5 5" />
+              <path d="M5 21h14" />
+            </svg>
+            Upload File
+          </button>
+          <button class="segment-btn" id="btnUrl">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            Website URL
+          </button>
         </div>
 
         <div class="dropzone collapsible" id="dropzone">
@@ -1431,16 +1430,7 @@
             </svg>
           </div>
           <h3>Upload your file</h3>
-          <p>Drag and drop or click to select</p>
-          <button class="select-btn" type="button" id="selectBtn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 15V3" />
-              <path d="m7 8 5-5 5 5" />
-              <path d="M5 21h14" />
-            </svg>
-            Select File
-          </button>
+          <p>Drag and drop or <a class="select-link" href="#" id="selectLink">click to select</a></p>
           <div class="picked" id="picked">
             <span id="pickedName"></span>
             <span class="clear" id="clearPick" title="Remove">✕</span>
@@ -1449,14 +1439,7 @@
         <input type="file" id="fileInput" />
 
         <div class="url-row collapsible collapsed" id="urlRow">
-          <span class="linkicon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
-          </span>
-          <input type="url" id="urlInput" placeholder="e.g. https://en.wikipedia.org/wiki/Markdown or a YouTube link" />
+          <input type="url" id="urlInput" placeholder="Write/paste any website or Youtube link" />
           <button class="clear-url-btn" id="clearUrlBtn" type="button" title="Clear URL" style="display: none;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
@@ -1555,7 +1538,7 @@
   <script>
     const dropzone = document.getElementById("dropzone");
     const fileInput = document.getElementById("fileInput");
-    const selectBtn = document.getElementById("selectBtn");
+    const selectLink = document.getElementById("selectLink");
     const picked = document.getElementById("picked");
     const pickedName = document.getElementById("pickedName");
     const clearPick = document.getElementById("clearPick");
@@ -1621,7 +1604,7 @@
     });
 
     // --- File selection ---
-    selectBtn.addEventListener("click", e => { e.stopPropagation(); fileInput.click(); });
+    selectLink.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); fileInput.click(); });
     dropzone.addEventListener("click", () => fileInput.click());
     ["dragover", "dragenter"].forEach(evt =>
       dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add("drag"); })
@@ -2164,7 +2147,7 @@
 
         if (item.id === "full_disk_access") {
           fixContent = `
-            <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 8px 12px; border-radius: 8px;">
+            <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 8px 12px; border-radius: 5.33px;">
               <span style="font-size: .8rem; color: #334155;">Grant Full Disk Access in macOS Settings</span>
               <button class="diag-action-btn" style="background: #007aff; color: #fff;" onclick="openMacOSSettings()">Open System Settings</button>
             </div>
