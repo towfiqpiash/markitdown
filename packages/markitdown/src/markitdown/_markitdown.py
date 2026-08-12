@@ -112,7 +112,8 @@ class MarkItDown:
             # e.g., https://blog.cloudflare.com/markdown-for-agents/
             self._requests_session.headers.update(
                 {
-                    "Accept": "text/markdown, text/html;q=0.9, text/plain;q=0.8, */*;q=0.1"
+                    "Accept": "text/markdown, text/html;q=0.9, text/plain;q=0.8, */*;q=0.1",
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
                 }
             )
         else:
@@ -472,15 +473,39 @@ class MarkItDown:
             )
         # HTTP/HTTPS URIs
         elif uri.startswith("http:") or uri.startswith("https:"):
-            response = self._requests_session.get(uri, stream=True)
-            response.raise_for_status()
-            return self.convert_response(
-                response,
-                stream_info=stream_info,
-                file_extension=file_extension,
-                url=mock_url,
-                **kwargs,
-            )
+            base_guess = StreamInfo(url=uri, mimetype="text/html")
+            if stream_info is not None:
+                base_guess = base_guess.copy_and_update(stream_info)
+
+            # Check for YouTube URLs directly to avoid HTTP 429 redirects
+            parsed = urlparse(uri)
+            if "youtube.com" in parsed.netloc or "youtu.be" in parsed.netloc:
+                return self.convert_stream(
+                    io.BytesIO(b""),
+                    stream_info=base_guess,
+                    file_extension=file_extension,
+                    url=mock_url,
+                    **kwargs,
+                )
+
+            try:
+                response = self._requests_session.get(uri, stream=True)
+                response.raise_for_status()
+                return self.convert_response(
+                    response,
+                    stream_info=stream_info,
+                    file_extension=file_extension,
+                    url=mock_url,
+                    **kwargs,
+                )
+            except Exception as exc:
+                # If HTTP request failed (e.g. 429/403 rate-limiting), try matching registered URL converters
+                sorted_registrations = sorted(self._converters, key=lambda x: x.priority)
+                for converter_registration in sorted_registrations:
+                    converter = converter_registration.converter
+                    if converter.accepts(io.BytesIO(b""), base_guess, **kwargs):
+                        return converter.convert(io.BytesIO(b""), base_guess, **kwargs)
+                raise exc
         else:
             raise ValueError(
                 f"Unsupported URI scheme: {uri.split(':')[0]}. Supported schemes are: file:, data:, http:, https:"
