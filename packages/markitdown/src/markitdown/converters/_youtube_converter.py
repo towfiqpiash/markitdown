@@ -1,4 +1,3 @@
-import json
 import time
 import re
 import bs4
@@ -95,96 +94,101 @@ class YouTubeConverter(DocumentConverter):
                         metadata[key] = content
                     break
 
-        # Try reading the description
+        # Capture the video's original audio language (e.g. "bn" for a Bengali
+        # video), when present, so the transcript can be fetched in that
+        # language rather than defaulting to English.
         try:
             for script in soup(["script"]):
-                if not isinstance(script, bs4.Tag):
+                if not isinstance(script, bs4.Tag) or not script.string:
                     continue
-                if not script.string:  # Skip empty scripts
-                    continue
-                content = script.string
-                if "ytInitialData" in content:
-                    match = re.search(r"var ytInitialData = ({.*?});", content)
-                    if match:
-                        data = json.loads(match.group(1))
-                        attrdesc = self._findKey(data, "attributedDescriptionBodyText")
-                        if attrdesc and isinstance(attrdesc, dict):
-                            metadata["description"] = str(attrdesc.get("content", ""))
+                match = re.search(
+                    r'"defaultAudioLanguage"\s*:\s*"([A-Za-z-]+)"', script.string
+                )
+                if match:
+                    metadata["defaultAudioLanguage"] = match.group(1)
                     break
         except Exception as e:
-            print(f"Error extracting description: {e}")
+            print(f"Error extracting default audio language: {e}")
             pass
 
         # Start preparing the page
-        webpage_text = "# YouTube\n"
+        webpage_text = ""
 
         title = self._get(metadata, ["title", "og:title", "name"])  # type: ignore
         assert isinstance(title, str)
 
         if title:
-            webpage_text += f"\n## {title}\n"
-
-        stats = ""
-        views = self._get(metadata, ["interactionCount"])  # type: ignore
-        if views:
-            stats += f"- **Views:** {views}\n"
-
-        keywords = self._get(metadata, ["keywords"])  # type: ignore
-        if keywords:
-            stats += f"- **Keywords:** {keywords}\n"
-
-        runtime = self._get(metadata, ["duration"])  # type: ignore
-        if runtime:
-            stats += f"- **Runtime:** {runtime}\n"
-
-        if len(stats) > 0:
-            webpage_text += f"\n### Video Metadata\n{stats}\n"
-
-        description = self._get(metadata, ["description", "og:description"])  # type: ignore
-        if description:
-            webpage_text += f"\n### Description\n{description}\n"
+            webpage_text += f"# {title}\n"
 
         if IS_YOUTUBE_TRANSCRIPT_CAPABLE:
-            ytt_api = YouTubeTranscriptApi()
             transcript_text = ""
-            parsed_url = urlparse(stream_info.url)  # type: ignore
-            params = parse_qs(parsed_url.query)  # type: ignore
-            if "v" in params and params["v"][0]:
-                video_id = str(params["v"][0])
-                transcript_list = ytt_api.list(video_id)
-                languages = ["en"]
-                for transcript in transcript_list:
-                    languages.append(transcript.language_code)
-                    break
+            video_id = self._extract_video_id(stream_info.url)  # type: ignore
+            if video_id:
+                # A failure to obtain the transcript (captions disabled, the
+                # video is age-restricted/unavailable, or YouTube is
+                # rate-limiting/blocking the request) must not abort the whole
+                # conversion -- the title, metadata, and description are still
+                # useful on their own.
                 try:
-                    youtube_transcript_languages = kwargs.get(
-                        "youtube_transcript_languages", languages
-                    )
-                    # Retry the transcript fetching operation
-                    transcript = self._retry_operation(
-                        lambda: ytt_api.fetch(
-                            video_id, languages=youtube_transcript_languages
-                        ),
-                        retries=3,  # Retry 3 times
-                        delay=2,  # 2 seconds delay between retries
-                    )
+                    ytt_api = YouTubeTranscriptApi()
+                    transcript_list = ytt_api.list(video_id)
 
-                    if transcript:
-                        transcript_text = " ".join(
-                            [part.text for part in transcript]
-                        )  # type: ignore
+                    # Decide which language to fetch. An explicit caller
+                    # override wins; otherwise prefer the video's own language
+                    # -- its default audio language (so a Bengali video yields a
+                    # Bengali transcript), then manually-created captions, then
+                    # auto-generated ones -- instead of defaulting to English.
+                    languages = kwargs.get("youtube_transcript_languages")
+                    if not languages:
+                        default_lang = self._get(metadata, ["defaultAudioLanguage"])
+                        default_variants = []
+                        if default_lang:
+                            # e.g. "en-US" -> prefer both "en-US" and "en".
+                            default_variants = [default_lang, default_lang.split("-")[0]]
+                        manual = [
+                            t.language_code
+                            for t in transcript_list
+                            if not t.is_generated
+                        ]
+                        generated = [
+                            t.language_code
+                            for t in transcript_list
+                            if t.is_generated
+                        ]
+                        # De-duplicate while preserving priority order.
+                        seen: set = set()
+                        languages = [
+                            code
+                            for code in default_variants + manual + generated
+                            if code and not (code in seen or seen.add(code))
+                        ]
+
+                    if languages:
+                        try:
+                            # Retry the transcript fetching operation
+                            transcript = self._retry_operation(
+                                lambda: ytt_api.fetch(video_id, languages=languages),
+                                retries=3,  # Retry 3 times
+                                delay=2,  # 2 seconds delay between retries
+                            )
+                            if transcript:
+                                transcript_text = " ".join(
+                                    [part.text for part in transcript]
+                                )  # type: ignore
+                        except Exception:
+                            # Preferred languages unavailable -- translate an
+                            # available transcript into the top preference.
+                            transcript = (
+                                transcript_list.find_transcript(languages)
+                                .translate(languages[0])
+                                .fetch()
+                            )
+                            transcript_text = " ".join(
+                                [part.text for part in transcript]
+                            )
                 except Exception as e:
-                    # No transcript available
-                    if len(languages) == 1:
-                        print(f"Error fetching transcript: {e}")
-                    else:
-                        # Translate transcript into first kwarg
-                        transcript = (
-                            transcript_list.find_transcript(languages)
-                            .translate(youtube_transcript_languages[0])
-                            .fetch()
-                        )
-                        transcript_text = " ".join([part.text for part in transcript])
+                    # No transcript could be retrieved -- skip it gracefully.
+                    print(f"Error fetching transcript: {e}")
             if transcript_text:
                 webpage_text += f"\n### Transcript\n{transcript_text}\n"
 
@@ -207,6 +211,24 @@ class YouTubeConverter(DocumentConverter):
             if k in metadata:
                 return metadata[k]
         return default
+
+    def _extract_video_id(self, url: Union[str, None]) -> Union[str, None]:
+        """Extract an 11-character YouTube video id from the common URL forms:
+        watch?v=..., youtu.be/..., /shorts/..., and /embed/..."""
+        if not url:
+            return None
+        parsed = urlparse(url)
+        v = parse_qs(parsed.query).get("v", [None])[0]
+        if v:
+            return v
+        match = re.search(r"/(?:shorts|embed)/([A-Za-z0-9_-]{11})", parsed.path)
+        if match:
+            return match.group(1)
+        if parsed.netloc.endswith("youtu.be"):
+            candidate = parsed.path.lstrip("/").split("/")[0]
+            if candidate:
+                return candidate
+        return None
 
     def _findKey(self, json: Any, key: str) -> Union[str, None]:  # TODO: Fix json type
         """Recursively search for a key in nested dictionary/list structures."""

@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "markitdown-ui"
+dynamic = ["version"]
+description = 'A minimal local web UI for the "markitdown" library.'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Adam Fourney", email = "adamfo@microsoft.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
+  "python-multipart>=0.0.9",
+  "markitdown[all]>=0.1.1,<0.2.0",
+  # Pinned explicitly so YouTube transcription works even when markitdown[all]
+  # resolves to a release with a tighter pin. `~=1.0` (>=1.0,<2.0) is required
+  # to pick up 1.2.3+, the first versions that support Python 3.14.
+  "youtube-transcript-api~=1.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/microsoft/markitdown#readme"
+Issues = "https://github.com/microsoft/markitdown/issues"
+Source = "https://github.com/microsoft/markitdown"
+
+[tool.hatch.version]
+path = "src/markitdown_ui/__about__.py"
+
+[project.scripts]
+markitdown-ui = "markitdown_ui.__main__:main"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/markitdown_ui}"
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/markitdown_ui"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/markitdown_ui"]
